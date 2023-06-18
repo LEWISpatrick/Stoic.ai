@@ -1,22 +1,29 @@
+#!/usr/bin/env python3
+
+"A program to fetch stoic quotations and display them"
+
+import random
+import os
 import tkinter as tk
 from PIL import ImageTk, Image
-import random
 import requests
 from bs4 import BeautifulSoup
-import os
 
-stoic_website_url = "https://iep.utm.edu/stoicism/"
 # The URL of the Stoic website from which quotes will be fetched
+STOIC_WEBSITE_URL = "https://iep.utm.edu/stoicism/"
 
-image_url = "https://dailystoic.com/wp-content/uploads/2016/07/marcusaureliusdailystoic-scaled.jpg"
 # The URL of the image to be displayed alongside the Stoic quote
+IMAGE_URL = "https://dailystoic.com/wp-content/uploads/2016/07/marcusaureliusdailystoic-scaled.jpg"
 
-image_path = os.path.join(os.getcwd(), "download (2)")
 # The local path where the downloaded image will be saved
+image_path = os.path.join(os.getcwd(), "download (2)")
+
 
 def get_stoic_quotes():
+    "Fetch quotations from the web and extract them to a list"
+
     # Send a GET request to the Stoic website
-    response = requests.get(stoic_website_url)
+    response = requests.get(STOIC_WEBSITE_URL)
 
     if response.status_code == 200:
         # Parse the HTML content of the response using BeautifulSoup
@@ -33,27 +40,29 @@ def get_stoic_quotes():
 
         # Return the list of Stoic quotes
         return quotes
-    else:
-        # If the request fails, print an error message and return an empty list
-        print("Failed to retrieve Stoic quotes. Status code:", response.status_code)
-        return []
+
+    # If the request fails, print an error message and return an empty list
+    print("Failed to retrieve Stoic quotes. Status code:", response.status_code)
+    return []
 
 
 def download_image():
+    "Download the image"
     # Download the image from the given URL
-    response = requests.get(image_url, stream=True)
+    response = requests.get(IMAGE_URL, stream=True)
     if response.status_code == 200:
         # If the download is successful, save the image to the specified path
         with open(image_path, "wb") as file:
             file.write(response.content)
         return True
-    else:
-        # If the download fails, print an error message with the status code
-        print("Failed to download image. Status code:", response.status_code)
-        return False
+
+    # If the download fails, print an error message with the status code
+    print("Failed to download image. Status code:", response.status_code)
+    return False
 
 
 def display_stoic_popup():
+    "Display the image"
     quotes = get_stoic_quotes()  # Fetch Stoic quotes
     if quotes:
         quote = random.choice(quotes)  # Select a random quote from the retrieved quotes
@@ -69,10 +78,16 @@ def display_stoic_popup():
         image = Image.open(image_path)
         image = image.resize((500, 500), Image.ANTIALIAS)
 
+        # Create an empty label widget for displaying an image
         image_label = tk.Label(root)
+
+        # Pack the image label widget into the main window with some vertical padding
         image_label.pack(pady=20)
 
+        # Create a label widget for displaying a quote with specified font and wrap length
         quote_label = tk.Label(root, text=quote, font=("Serif", 16), wraplength=600)
+
+        # Pack the quote label widget into the main window with some vertical padding
         quote_label.pack(pady=20)
 
         def update_quote():
@@ -82,8 +97,15 @@ def display_stoic_popup():
 
         update_quote()
 
+        # Create a Tkinter-compatible photo image from the loaded image
         image_tk = ImageTk.PhotoImage(image)
+
+        # Configure the image label widget to display the photo image
         image_label.config(image=image_tk)
+
+        # Store a reference to the photo image in the image label
+        # widget to prevent it from being garbage collected
+
         image_label.image = image_tk
 
     else:
